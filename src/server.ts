@@ -25,6 +25,6 @@ app.use(passportConfig.session());
 
 //Routes
 
-app.use('/api', UsersRoutes)
+app.use('/api/', UsersRoutes)
 
 export default app
