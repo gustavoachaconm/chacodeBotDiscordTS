@@ -3,7 +3,7 @@ import mongoose, {Schema, Document} from 'mongoose'
 export type UsersType = Document & {
     discordUserId: number
     discordUserName:string
-    discordUserAvatar: string
+    discordUserAvatarUrl: string
     discordUserMail: string
 }
 
@@ -18,7 +18,7 @@ const UsersSchema: Schema = new Schema ({
         require: true,
         trim: true
     },
-    discordUserAvatar:{
+    discordUserAvatarUrl:{
         type: String,
         require: true,
         trim: true

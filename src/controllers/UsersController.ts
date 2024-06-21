@@ -2,9 +2,12 @@ import type {Request, Response, NextFunction} from 'express'
 import passport from 'passport';
 import Users from '../models/Users';
 import { singToken } from '../middleware/jwt';
+import bitfieldCalculator from 'discord-bitfield-calculator';
 
-
+let userData: any = [];
 export class UsersControllers {
+
+
 
         static usersLogin = async (req:Request, res:Response) => {
 
@@ -32,23 +35,45 @@ export class UsersControllers {
             const {accesToken, profile} = data
 
             try {
-                let user = await Users.findOne({ discordUserId: profile.id})
+                let findUser = await Users.findOne({ discordUserId: profile.id})
 
                 const avatar = `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`
 
-                const payload={
+                const user={
                     discordUserId: profile.id,
                     discordUserName: profile.username,
-                    discordUserAvatar: avatar,
+                    discordUserAvatarUrl: avatar,
                     discordUserMail: profile.email
-                }               
+                }
 
-                if (!user) {
-                    user = await Users.create(payload)
-                } 
+                userData.push({                      
+                    user
+                 })
 
-                const token = await singToken(payload)
+                for (let i = 0; i < profile.guilds.length; i++) {
+                   const guilds = profile.guilds[i];
+
+                   if(guilds.owner === true) {
+                    const permission = bitfieldCalculator.permissions(guilds.permissions)
+
+                    if(permission.includes('ADMINISTRATOR')) {
+ 
+                     userData.push({                      
+                        guilds
+                     })
+                    
+                 }
+                }
+                }
+                
+
+                if (!findUser) {
+                  await Users.create(user)
+                }                
+                const token = await singToken(user)
                 if(!token) return res.redirect('/');
+
+                console.log(userData)
                 res.redirect('/dashboard')
 
             } catch (error) {
